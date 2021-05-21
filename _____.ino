@@ -3,23 +3,28 @@
 #include "Arduino.h"
 #include "TM1637Display.h"
 
-#define CLK 4
-#define DIO 5
+#define CLK 12
+#define DIO 13
 
-int coordination_state = "ON"; //初期設定連携ON
-int numfile, pw = "1"; //読み込み曲数変数,PWスイッチの変数
-int stay = "OFF";//待機中のテキストを一回だけ送信する変数
+int coordination_state = "ON",numfile, pw = "1",stay = "OFF"; //初期設定連携ON,読み込み曲数変数,PWスイッチの変数,待機中のテキストを一回だけ送信する変数
 const int vol = 25; //ボリューム調整0-30
-const int RX = 10; //RXピン
-const int TX = 11; //TXピン
 const int musictime = 25000;//5曲の秒数（1秒=1000ms）
-const int coordination_led = 6;//連携LEDピン
-const int interval_led = 7;//１０分モード時LEDピン
-const int hand_sw = 9;
-const int coordination_sw = 3;//連携モード変更ボタンピン
+
+
+const int now_sw = 2; //強制SW
+const int now_led =3;//強制LED
+const int coordination_sw = 4;//連携モード変更ボタン
+const int coordination_led = 5;//連携LED
+const int hand_sw = 6;//手動10分SW
+const int interval_led = 7;//１０分モード時LED
+
+const int now_signal =8;//通常信号
+const int ten_signal = 9;//10分信号
+const int RX = 10,TX = 11; //RXピン,TXピン
+
 const int speaker_sw = 18;//speakerリレーピン
 const int system_sw = 19;//キースイッチ入力ピン
-const int setting = 1; //PC接続時は「１」、単体のみは「０」
+
 
 
 TM1637Display display(CLK, DIO);
@@ -58,23 +63,22 @@ const uint8_t SEG_PLAY[] = {
 
 
 void setup() {
-  pinMode(2, INPUT_PULLUP);
-  pinMode(coordination_sw, INPUT_PULLUP);
-  pinMode(12, INPUT); //10
-  pinMode(coordination_led, OUTPUT);
-  pinMode(interval_led, OUTPUT);
-  pinMode(8, INPUT);//通常
-  attachInterrupt(0, forced,  FALLING);
-  pinMode(system_sw, INPUT_PULLUP);
-  pinMode(speaker_sw, OUTPUT);
-  pinMode(hand_sw, INPUT_PULLUP);
-  digitalWrite(speaker_sw, HIGH);
+  pinMode(now_sw, INPUT_PULLUP);//強制ボタン
+  pinMode(coordination_sw, INPUT_PULLUP);//連携切替スイッチ
+  pinMode(ten_signal, INPUT); //10分信号
+  pinMode(coordination_led, OUTPUT);//連携LED
+  pinMode(interval_led, OUTPUT);//10分間LED
+  pinMode(now_signal, INPUT);//通常信号
+  attachInterrupt(0, forced,  FALLING);//強制関数
+  pinMode(system_sw, INPUT_PULLUP);//キースイッチ切替
+  pinMode(speaker_sw, OUTPUT);//スピーカーリレースイッチ
+  pinMode(hand_sw, INPUT_PULLUP);//手動スイッチ
+  digitalWrite(speaker_sw, HIGH);//スピーカーリレースイッチON
   display.setBrightness(7);//0-7セグメントの輝度調整
 
 
 
   mySoftwareSerial.begin(9600);
-  if (setting == 1) { //デバッグ用
     Serial.begin(115200);
     Serial.println(F("＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝"));
     delay(500);
@@ -99,7 +103,6 @@ void setup() {
     Serial.println(F("曲"));
     Serial.println();
     Serial.println(F("＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝"));
-  }
 
   myDFPlayer.volume(vol);  //Set volume value. From 0 to 30
   myDFPlayer.play(1);  //Play the first mp3
@@ -134,14 +137,14 @@ void loop() {
       restart();
     }
 
-    if (digitalRead(12) == HIGH || digitalRead(hand_sw) == LOW) { //１０分間処理のとき
+    if (digitalRead(ten_signal) == HIGH || digitalRead(hand_sw) == LOW) { //１０分間処理のとき
       digitalWrite(interval_led, HIGH);
       interval();
       digitalWrite(interval_led, LOW);
       Serial.println(F("------------"));
 
     }
-    if (digitalRead(8) == HIGH && coordination_state == "ON") { //連動ONのときボタンを押したとき
+    if (digitalRead(now_signal) == HIGH && coordination_state == "ON") { //連動ONのときボタンを押したとき
       normal();
       Serial.println(F("------------"));
 
