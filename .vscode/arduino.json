@@ -1,5 +1,6 @@
 {
-    "board": "arduino:avr:uno",
-    "port": "/dev/tty.usbmodem14101",
-    "sketch": "_____.ino"
+    "board": "arduino:avr:nano",
+    "port": "/dev/tty.usbserial-1410",
+    "sketch": "_____.ino",
+    "configuration": "cpu=atmega328"
 }
