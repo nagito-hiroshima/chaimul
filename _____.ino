@@ -15,6 +15,7 @@ const int TX = 11; //TXピン
 const int musictime = 25000;//5曲の秒数（1秒=1000ms）
 const int coordination_led = 6;//連携LEDピン
 const int interval_led = 7;//１０分モード時LEDピン
+const int hand_sw = 9;
 const int coordination_sw = 3;//連携モード変更ボタンピン
 const int speaker_sw = 18;//speakerリレーピン
 const int system_sw = 19;//キースイッチ入力ピン
@@ -66,7 +67,7 @@ void setup() {
   attachInterrupt(0, forced,  FALLING);
   pinMode(system_sw, INPUT_PULLUP);
   pinMode(speaker_sw, OUTPUT);
-
+  pinMode(hand_sw, INPUT_PULLUP);
   digitalWrite(speaker_sw, HIGH);
   display.setBrightness(7);//0-7セグメントの輝度調整
 
@@ -133,7 +134,7 @@ void loop() {
       restart();
     }
 
-    if (digitalRead(12) == HIGH) { //１０分間処理のとき
+    if (digitalRead(12) == HIGH || digitalRead(hand_sw) == LOW) { //１０分間処理のとき
       digitalWrite(interval_led, HIGH);
       interval();
       digitalWrite(interval_led, LOW);
@@ -197,25 +198,33 @@ void interval() { //10分間のあれの処理
   coordination_off();
   myDFPlayer.play(5);
   Serial.println(F("== 再生開始(休憩開始)"));
-  delay(musictime);
-
-
+  int var = 1, Time = 601, Time_min, Time_sec;
+  while (var < 602) {
+    Time = Time - 1;
+    Time_min = ((Time % 3600) / 60) * 100;
+    Time_sec = Time % 60;
+    display.showNumberDecEx(Time_min + Time_sec, 0b01000000, false);
+    delay(1000);
+    var++;
+  }
   myDFPlayer.play(5);
   Serial.println(F("== 再生開始(休憩終了・授業開始)"));
   delay(musictime);
   Serial.println(F("== 再生終了"));
-
+  display.clear();
   Serial.println();
   coordination_on();
   stay = "OFF";
 }
 void normal() { //通常チャイム
   Serial.println(F("通常チャイム信号を検知しました"));
+  display.setSegments(SEG_PLAY);
   myDFPlayer.play(5);
   Serial.println(F("== 再生開始"));
   delay(musictime);
   Serial.println(F("== 再生終了"));
   Serial.println();
+  display.clear();
   stay = "OFF";
 }
 void coordination_on() { //連動ON
@@ -242,7 +251,7 @@ void restart() {//再スタート
   display.setSegments(SEG_STANDBY);
   digitalWrite(coordination_led, HIGH);
   digitalWrite(interval_led, HIGH);
-  delay(4000);
+  delay(3000);
   digitalWrite(interval_led, LOW);
   digitalWrite(coordination_led, LOW);
   delay(1000);
