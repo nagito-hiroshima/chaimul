@@ -34,19 +34,16 @@ DFRobotDFPlayerMini myDFPlayer;
 void printDetail(uint8_t type, int value);
 
 const uint8_t SEG_STANDBY[] = {
-  SEG_A | SEG_B | SEG_C | SEG_D | SEG_E | SEG_F | SEG_G | SEG_DP,
-  SEG_A | SEG_B | SEG_C | SEG_D | SEG_E | SEG_F | SEG_G | SEG_DP,
-  SEG_A | SEG_B | SEG_C | SEG_D | SEG_E | SEG_F | SEG_G | SEG_DP,
-  SEG_A | SEG_B | SEG_C | SEG_D | SEG_E | SEG_F | SEG_G | SEG_DP
+  255,255,255,255
 };
-const uint8_t SEG_ON[] = {0, 0,
+const uint8_t SEG_ON[] = {0,0,
   SEG_A | SEG_B | SEG_C | SEG_D | SEG_E | SEG_F, // O
-  SEG_C | SEG_E | SEG_G | SEG_DP                 // n
+  SEG_C | SEG_E | SEG_G  // n
 };
 const uint8_t SEG_OFF[] = {0,
   SEG_A | SEG_B | SEG_C | SEG_D | SEG_E | SEG_F, // O
   SEG_A | SEG_E | SEG_F | SEG_G ,                // F
-  SEG_A | SEG_E | SEG_F | SEG_G | SEG_DP         // F
+  SEG_A | SEG_E | SEG_F | SEG_G                // F
 };
 const uint8_t SEG_SLEEP[] = {
   SEG_A | SEG_C | SEG_D | SEG_F | SEG_G ,        // S
@@ -110,9 +107,10 @@ void setup() {
 
   digitalWrite(coordination_led, HIGH);
   digitalWrite(interval_led, HIGH);
-  delay(6000);
+  delay(3000);
   
   display.clear();
+   delay(3000);
   digitalWrite(interval_led, LOW);
   digitalWrite(coordination_led, LOW);
   delay(1000);
@@ -125,6 +123,7 @@ void setup() {
 
 void forced() { //割り込み処理
   myDFPlayer.play(5);
+  display.setSegments(SEG_PLAY);
   Serial.println(F("^^強制再生^^"));
 }
 
