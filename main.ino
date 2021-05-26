@@ -265,7 +265,7 @@ void restart() {//再スタート
   delay(3000);
   digitalWrite(interval_led, LOW);
   digitalWrite(coordination_led, LOW);
-   digitalWrite(now_led, LOW;
+  digitalWrite(now_led, LOW);
   delay(1000);
   display.setSegments(SEG_ON);
   coordination_state = "ON";
