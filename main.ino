@@ -6,7 +6,7 @@
 #define CLK 12
 #define DIO 13
 
-int coordination_state = "ON",numfile, pw = "1",stay = "OFF"; //初期設定連携ON,読み込み曲数変数,PWスイッチの変数,待機中のテキストを一回だけ送信する変数
+int coordination_state = "ON",numfile, pw = "ON",stay = "OFF"; //初期設定連携ON,読み込み曲数変数,PWスイッチの変数,待機中のテキストを一回だけ送信する変数
 const int vol = 25; //ボリューム調整0-30
 const int musictime = 25000;//5曲の秒数（1秒=1000ms）
 
@@ -66,6 +66,7 @@ void setup() {
   pinMode(coordination_led, OUTPUT);//連携LED
   pinMode(interval_led, OUTPUT);//10分間LED
   pinMode(now_signal, INPUT);//通常信号
+  pinMode(now_led, OUTPUT);//通常信号
   attachInterrupt(0, forced,  FALLING);//強制関数
   pinMode(system_sw, INPUT_PULLUP);//キースイッチ切替
   pinMode(speaker_sw, OUTPUT);//スピーカーリレースイッチ
@@ -107,12 +108,14 @@ void setup() {
 
   digitalWrite(coordination_led, HIGH);
   digitalWrite(interval_led, HIGH);
+  digitalWrite(now_led,HIGH);
   delay(3000);
   
   display.clear();
    delay(3000);
   digitalWrite(interval_led, LOW);
   digitalWrite(coordination_led, LOW);
+  digitalWrite(now_led,LOW);
   delay(1000);
   display.setSegments(SEG_ON);//セグメント[On]表示
   digitalWrite(coordination_led, HIGH);
@@ -124,14 +127,16 @@ void setup() {
 void forced() { //割り込み処理
   myDFPlayer.play(5);
   display.setSegments(SEG_PLAY);
+  digitalWrite(now_led,HIGH);
   Serial.println(F("^^強制再生^^"));
+  stay="OFF";
 }
 
 void forced_switch() {
 }
 void loop() {
   if (digitalRead(system_sw) == LOW) { //システム電源がONになっているとき
-    if (pw == "0") {
+    if (pw == "OFF") {
       digitalWrite(speaker_sw, HIGH);
       restart();
     }
@@ -150,7 +155,7 @@ void loop() {
     } else { //待機中の時
       if (stay == "OFF") {
         Serial.print(F("入力待機中"));
-        delay(500);
+         delay(500);
         Serial.print(F("."));
         delay(500);
         Serial.print(F("."));
@@ -159,6 +164,9 @@ void loop() {
         delay(500);
         Serial.println();
         stay = "ON";
+        digitalWrite(now_led,LOW);
+        
+
       }
     }
 
@@ -168,10 +176,10 @@ void loop() {
 
     if (coordination_state == "ON" && digitalRead(coordination_sw) == LOW) {
       coordination_off();
-      delay(1000);
+      delay(200);
     } else if (coordination_state == "OFF" && digitalRead(coordination_sw) == LOW) {
       coordination_on();
-      delay(1000);
+      delay(200);
     }
 
   } else if (digitalRead(system_sw) == HIGH) { //システム電源が斬られた時
@@ -179,7 +187,7 @@ void loop() {
       myDFPlayer.play(3);
       display.setSegments(SEG_OFF);
       Serial.println(F("システム休止...."));
-      pw = "0";
+      pw = "OFF";
       delay(1000);
       display.clear();
       delay(1000);
@@ -253,9 +261,11 @@ void restart() {//再スタート
   display.setSegments(SEG_STANDBY);
   digitalWrite(coordination_led, HIGH);
   digitalWrite(interval_led, HIGH);
+  digitalWrite(now_led, HIGH);
   delay(3000);
   digitalWrite(interval_led, LOW);
   digitalWrite(coordination_led, LOW);
+   digitalWrite(now_led, LOW;
   delay(1000);
   display.setSegments(SEG_ON);
   coordination_state = "ON";
@@ -263,7 +273,7 @@ void restart() {//再スタート
   delay(3000);
   display.clear();
   Serial.println(F("＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝"));
-  pw = "1";
+  pw = "ON";
 }
 
 void printDetail(uint8_t type, int value) {//DFPlayerのシステム状況
