@@ -7,16 +7,16 @@
 #define DIO 13
 
 int coordination_state = "ON",numfile, pw = "ON",stay = "OFF"; //初期設定連携ON,読み込み曲数変数,PWスイッチの変数,待機中のテキストを一回だけ送信する変数
-const int vol = 25; //ボリューム調整0-30
+const int vol = 20; //ボリューム調整0-30
 const int musictime = 25000;//5曲の秒数（1秒=1000ms）
 
 
 const int now_sw = 2; //強制SW
 const int now_led =3;//強制LED
-const int coordination_sw = 4;//連携モード変更ボタン
-const int coordination_led = 5;//連携LED
-const int hand_sw = 6;//手動10分SW
-const int interval_led = 7;//１０分モード時LED
+const int coordination_sw = 6;//連携モード変更ボタン
+const int coordination_led = 7;//連携LED
+const int hand_sw = 4;//手動10分SW
+const int interval_led = 5;//１０分モード時LED
 
 const int now_signal =8;//通常信号
 const int ten_signal = 9;//10分信号
@@ -118,6 +118,7 @@ void setup() {
   digitalWrite(now_led,LOW);
   delay(1000);
   display.setSegments(SEG_ON);//セグメント[On]表示
+  coordination_state == "ON"
   digitalWrite(coordination_led, HIGH);
   delay(5000);
 
